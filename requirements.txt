@@ -1,0 +1,7 @@
+fastapi[all]
+loguru
+uvicorn
+pydantic
+pytest
+pytest-asyncio
+httpx
