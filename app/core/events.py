@@ -4,7 +4,7 @@
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#      https://www.apache.org/licenses/LICENSE-2.0
 #
 #  Unless required by applicable law or agreed to in writing, software
 #  distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,10 +12,24 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from functools import lru_cache
+from typing import Callable
+from fastapi import FastAPI
+from loguru import logger
+
 from app.core.settings.app import AppSettings
+from app.database.events import close_db_connection, connect_to_db
 
 
-@lru_cache
-def get_app_settings() -> AppSettings:
-    return AppSettings()
+def create_start_app_handler(app: FastAPI, settings: AppSettings) -> Callable:
+    async def start_app() -> None:
+        await connect_to_db(app, settings)
+
+    return start_app
+
+
+def create_stop_app_handler(app: FastAPI) -> Callable:
+    @logger.catch
+    async def stop_app() -> None:
+        await close_db_connection(app)
+
+    return stop_app

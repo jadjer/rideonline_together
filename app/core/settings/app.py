@@ -14,10 +14,10 @@
 
 import logging
 import sys
-from typing import Any, Dict, List, Tuple
 
+from typing import Any, Dict, List, Tuple
 from loguru import logger
-from pydantic import HttpUrl
+from pydantic import ConfigDict, FilePath
 
 from app.core.logging import InterceptHandler
 from app.core.settings.base import BaseAppSettings
@@ -29,18 +29,23 @@ class AppSettings(BaseAppSettings):
     openapi_prefix: str = ""
     openapi_url: str = "/openapi.json"
     redoc_url: str = "/redoc"
-    title: str = "Ride2Online Announcement"
-    version: str = "0.0.0"
+    title: str = "Ride Online Together"
+    version: str = "v0.0.0"
 
-    api_prefix: str = ""
+    database_host: str = "127.0.0.1"
+    database_port: int = 7687
+    database_user: str = "neo4j"
+    database_pass: str
+
+    public_key_path: FilePath
+    public_key: str = ""
+
+    api_prefix: str = "/api"
 
     allowed_hosts: List[str] = ["*"]
 
     logging_level: int = logging.INFO
     loggers: Tuple[str, str] = ("uvicorn.asgi", "uvicorn.access")
-
-    class Config:
-        validate_assignment = True
 
     @property
     def fastapi_kwargs(self) -> Dict[str, Any]:
@@ -53,6 +58,15 @@ class AppSettings(BaseAppSettings):
             "title": self.title,
             "version": self.version,
         }
+
+    @property
+    def get_database_url(self) -> str:
+        url_string: str = "neo4j://{host}:{port}".format(
+            host=self.database_host,
+            port=self.database_port
+        )
+
+        return url_string
 
     def configure_logging(self) -> None:
         logging.getLogger().handlers = [InterceptHandler()]
