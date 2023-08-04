@@ -12,15 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from fastapi import HTTPException
-from fastapi.requests import Request
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter
 
-from app.models.schemas.wrapper import WrapperResponse
+router = APIRouter(prefix="/v1")
 
-
-async def http_error_handler(_: Request, exc: HTTPException) -> JSONResponse:
-    return JSONResponse(
-        content=WrapperResponse(success=False, message=exc.detail).model_dump(),
-        status_code=exc.status_code
-    )
+# router.include_router(events.router, tags=["Events"], prefix="/events")
